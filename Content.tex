@@ -1,0 +1,646 @@
+% !TEX root = Prezentace.tex
+
+\usetheme{default}
+
+\usepackage{colortbl}
+\usepackage{xltxtra}
+\usepackage{nameref}
+\usepackage{tikz, pgf, pgfplots}
+\usepackage{gnuplot-lua-tikz}
+\makeatletter
+\newcommand*{\sectionframe}{\frame{\huge{\textbf{\thesection}. \@currentlabelname}}}
+\makeatother
+\usepackage[authoryear]{natbib}
+\usepackage{rotating}
+
+\title{Lock-chart solving}
+\subtitle{Dissertation defense}
+
+\author{Radomír Černoch}
+\date{27/6/2018}
+
+\newcommand\cinv{\cellcolor{black}\color{white}}
+\newcommand\bigforall{\mbox{\Large $\mathsurround0pt\forall$}}
+
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\section{Introduction}
+\sectionframe
+
+
+
+\begin{frame}{Tumbler lock}
+  \includegraphics[width=\textwidth]{TumblerLock.pdf}
+  \pause
+  In this picture:
+  \begin{itemize}
+    \item There are 4 \emph{positions} (vertical bars).
+    \item There are 4 \emph{cutting depths} (horizontal lines).
+  \end{itemize}
+  $$p=4, d=4$$
+\end{frame}
+
+\begin{frame}{Lock-chart problem}
+  \begin{minipage}[t][180pt][t]{\textwidth}
+    \only<1|handout:0>{\includegraphics{Definitions1.pdf}}
+    \only<2|handout:1>{\includegraphics{Definitions2.pdf}}
+    %\only<3|handout:1>{\includegraphics{Definitions3.pdf}}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Motivation}
+  \begin{block}{Reviewer's comment}
+    Based on the presented research,
+    has there been a progamme written
+    that could be practically used
+    to design master keyed systems?
+  \end{block}
+  \begin{block}{Otázka oponenta}
+    Byl na základě představeného výzkumu napsán program,
+    který se v praxi použil na návrh zámků a klíčů,
+    případně na nějaké dílčí úlohy?
+  \end{block}
+\end{frame}
+
+
+\begin{frame}{Motivation}
+  \begin{minipage}[t][180pt][t]{.40\textwidth}
+    \bigskip
+
+    \includegraphics[width=\textwidth]{Extension.png}
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}[t][180pt][t]{.55\textwidth}
+    \textbf{CyberCalc:} Depth-first-search with
+    constraint-satisfaction pruning 
+    and many heuristics.
+
+    \pause
+
+    \begin{block}{Issues}
+      \begin{itemize}
+        \item \textbf{Lack of insight} into heuristics' effects.
+        \item Does not scale for \textbf{modern platforms} with $\geq 10^6$ key cuttings. 
+        \item Can some subproblems be \textbf{polynomial}? Under which assumptions?
+        \item The \textbf{extensibility} problem.
+      \end{itemize}
+    \end{block}
+  \end{minipage}
+\end{frame}
+
+
+\begin{frame}{Motivation}
+  \begin{center}
+    \includegraphics[width=\textwidth]{Extension.png}
+  \end{center}
+\end{frame}
+
+
+
+\section{Complexity classes}
+\sectionframe
+
+
+
+\begin{frame}{Frameworks}
+  4 constraint \textit{frameworks} of increasing expressivity:
+  \begin{enumerate}
+    \item \textbf{Vanilla}: Number of positions $p$ and cutting depths $d$.
+    \item (\textbf{Asymmetric}: Number of cutting depths varies between positions.)
+    \item \textbf{General}: Plus a set of \textit{general constraints} (gecons).
+    \item (\textbf{Explicit}: List of valid key cuttings is algorithm's input.)
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{General framework}
+  \begin{minipage}[t][180pt][t]{.4\textwidth}
+    \bigskip
+
+    \includegraphics[width=\textwidth]{Constraints.png}
+  \end{minipage}
+  \begin{minipage}[t][180pt][t]{.55\textwidth}
+    \begin{block}{Why gecons?}
+      \begin{itemize}
+        \item Most constraints “overlap”, \textbf{counting key cuttings} that satisfy all constraints is difficult.
+        \item \textbf{Gecon} = a formally defined group of forbidden key cuttings.
+        \item 15 rules can be each “compiled” to a set of gecons.
+      \end{itemize}
+    \end{block}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{General framework}
+  \begin{minipage}[t][180pt][t]{.40\textwidth}
+    \bigskip
+
+    \includegraphics[width=\textwidth]{Constraints.png}
+  \end{minipage}
+  \begin{minipage}[t][180pt][t]{.55\textwidth}
+    \begin{block}{Counting key cuttings}
+      \begin{itemize}
+        \item Derive number of key cuttings \textbf{invalidated} by 1 gecon.
+        \item Define an \textbf{intersection} of 2 gecons (which is also a gecon).
+        \item Design a \textbf{inclusion-exclusion} counting procedure.
+        \item It can count $\approx 840 \cdot 10^6$ keys within $60\,$s.
+      \end{itemize}
+    \end{block}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{General framework}
+  \begin{block}{$\mathcal{NP}$-completeness}
+    \begin{itemize}
+      \item \textbf{Gecon} corresponds to 1 clause in the SAT problem.
+      \item SAT is equivalent to solving a
+            “$1 \text{ key} \times 0 \text{ locks}$” lock-chart.
+      \item Lock-chart solving in the general framework is $\mathcal{NP}$-complete.
+    \end{itemize}
+  \end{block}
+  \pause
+  \begin{block}{Counting key cuttings}
+    \begin{itemize}
+      \item Both reductions \textbf{preserve} the number of solutions.
+      \item \#SAT counts the number of valid key cuttings.
+      \item Counting key cuttings is in $\#\mathcal{P}$.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{$\mathcal{NP}$-complete classes}
+  $\bullet$ = lock-chart problem instance grows in this parameter
+
+  \vfill
+  \begin{tabular}{r|cc|ccc|ccl}
+       & framework & lock-chart      & \begin{rotate}{60}positions\end{rotate} & \begin{rotate}{60}depths\end{rotate} & \begin{rotate}{60}gecons\end{rotate} & \begin{rotate}{60}keys\end{rotate} & \begin{rotate}{60}locks\end{rotate} &                  \\\hline
+    1. & general   & all             & $\bullet$                               &                                      & $\bullet$                            &                                    &                                     &                  \\\pause
+    2. & vanilla   & extension       & $\bullet$                               &                                      &                                      &                                    & $\bullet$                           & \cite{lawer2004} \\\pause
+    3. & vanilla   & melted-profiles &                                         & $\bullet$                            &                                      & $\bullet$                          & $\bullet$                           &                  \\
+  \end{tabular}
+
+  \vfill
+  \begin{itemize}
+    \item Results 1. and 2. proved by a reduction from SAT.
+    \item Result 3. by a reduction from \textit{k}-coloring.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Vanilla framework}
+  Complexity classes of lock-chart problem variants:
+  \begin{center}
+    \includegraphics[width=.7\textwidth]{LockChartHierarchy.pdf}  
+  \end{center}
+\end{frame}
+
+
+
+\begin{frame}{Vanilla framework}
+  \begin{minipage}[t][180pt][t]{.45\textwidth}
+    \emph{Diagonal} lock-chart:
+
+    \bigskip
+
+    \includegraphics{DiagonalLockChart.pdf}
+
+    Contains exactly 1 \emph{general} key which opens all locks
+    and several \emph{individual} keys which open exactly 1 lock.
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}[t][180pt][t]{.45\textwidth}
+    \begin{block}{Properties}
+      \begin{itemize}
+        \item Finding cuttings for individual keys translates to the
+        \textit{maximum independent set} (MIS) problem.
+        \item This is true for all frameworks.
+      \end{itemize}
+    \end{block}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Vanilla framework}
+  \begin{block}{Structure of the MIS graph}
+    \begin{itemize}
+      \item The MIS graph can be partitioned into $S_0, \ldots, S_p$ \textbf{classes},
+        based on the distance to the cutting of the general key.
+      \item Size of the $q$-th class was derived to be
+        $$|S_q| = \binom{p}{p-q}\cdot (d-1)^{p-q}\ ,$$
+        maximized if $q=\hat q$, where
+        $$\hat{q}=\left\lfloor \frac{p+1}{d}\right\rfloor\ .$$
+      \pause
+      \item Each $S_q$ class is an independent set (true in every fw.).
+      \item $S_{\hat{q}}$ is the maximum independent set (in vanilla fw.).
+      \pause
+      \item The \textit{rotating constant method} (RCM) was analysed.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Vanilla framework}
+  \begin{itemize}
+    \item Solution exists iff the number of keys is at most $|S_{\hat{q}}|$.
+    \item Diagonal lock-charts in the vanilla framework are polynomial.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Other frameworks}
+  \begin{itemize}
+    \item MIS is $\mathcal{NP}$-complete, but it can be approximated.
+    \pause
+    \item Since each $S_q$ is an independent set,
+      RCM gives at least a \textbf{lower bound} on the MIS size.
+    \item How tight is this bound?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Other frameworks}
+  \begin{minipage}[t][180pt][t]{.44\textwidth}
+    \begin{itemize}
+      \item Real-world constraints were randomly sampled.
+      \item The MIS graph was constructed in memory.
+      \item RCM was compared againts an exact algorithm\\
+        (backtracking, exponential runtime).
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t][180pt][t]{.45\textwidth}
+    \bigskip
+
+    \resizebox{1.1\textwidth}{1.1\textwidth}{%
+      \input{SagExactSkew.tex}
+    }
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Other frameworks}
+  RCM gives a lower bound on the size of diagonal lock-charts:
+  \begin{enumerate}
+    \item \textbf{Vanilla}: Given by a closed formula.
+    \item \textbf{Asymmetric}: Calculated using
+      dynamic programming (not discussed here, still in $\mathcal{P}$).
+    \item \textbf{General}: A modified inclusion-exclusion algorithm.
+  \end{enumerate}
+\end{frame}
+
+
+
+
+\section{Practical algorithms}
+\sectionframe
+
+
+
+\begin{frame}[fragile]{Use of cutting-counting}
+  \begin{minipage}[t][180pt][t]{.58\textwidth}
+    A typical real-world lc.:
+    \begin{verbatim}
+**..*.....*........
+*.*..*.....*....... <- Group 1
+*...**.*....*......
+***.....*....*.....
+****...*......*....
+**..*..........*...
+*.*..*..........*.. <- Group 1
+*...***.*........*.
+**********........*
+\____ ___/\___ ___/
+     ˇ        ˇ
+  MASTER  INDIVIDUAL
+    \end{verbatim}
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}[t][180pt][t]{.4\textwidth}
+    \begin{itemize}
+      \item Each \textit{group} defined by a combination of master keys.
+      \item RCM was generalized to count individual keys in each group.
+    \end{itemize}
+  \end{minipage}
+\end{frame}
+
+
+
+\begin{frame}{All-different pruning}
+  \begin{itemize}
+    \item \emph{All-different} algorithm is inspired
+    by \emph{constraint satifaction problems}.
+
+    \item If there are less cuttings for individual keys
+    than the size of the group, \textbf{no solution can exist}.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{All-different pruning}
+  \begin{itemize}
+    \item The algorithm by \cite{lawer2004}
+    (which optimizes a criterial function)
+    was taken as a base-line.
+    \item The all-different pruning reduces runtime
+    \begin{itemize}
+      \item by $9\%$ on a real-world dataset,
+      \item by $80\%$ on a synthetic dataset (larger lock-charts).
+    \end{itemize}
+    \item Keeps completeness and optimality.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{SAT approach}
+  \begin{itemize}
+    \item Lock-chart problem was translated to SAT.
+    \item The criterial function was approximated (no optimality guaranteed).
+    \item The SAT instances were solved by MiniSAT \cite{een2003}.
+    \pause
+    \item Only algorithm that solves \textbf{all lock-charts} in all datasets.
+    \item Runtime is \textbf{2 orders of magnitude faster}.
+    \item Optimal result achieved in \textbf{all but one} lock-chart.
+    \item Suitable for small lock-charts (up to $\sim 100\times 100$) due to many auxiliary variables.
+  \end{itemize}
+\end{frame}
+
+
+
+\section{Extensibility}
+\sectionframe
+
+
+
+\begin{frame}{General approach}
+  \begin{itemize}
+    \item \textbf{Extensibility:} dealing with unknown constraints,
+    added after a solution is found.
+    \item \textbf{Example:} Adding 1 floor to the building.
+    \pause    
+    \item Extensibility was vaguely defined and hard to quantify.
+    \item Main idea: Given some assumptions,
+    \textbf{extrapolate} the from-scratch lock-chart
+    to the \textbf{largest solvable} lock-chart.
+    \item Such lock-chart is called \textit{extremal}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Individual keys}
+  \begin{minipage}[t][180pt][t]{.35\textwidth}
+    \bigskip
+
+    \includegraphics{DiagonalLockChart.pdf}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t][180pt][t]{.63\textwidth}
+    \begin{itemize}
+      \item \textbf{Assumptions:}
+      \begin{enumerate}
+        \item The lock-chart is diagonal.
+        \item Only individual keys will be added in future.
+      \end{enumerate}
+      \item \textbf{Consequences:}
+      \begin{enumerate}
+        \item Pick cuttings from $S_{\hat{q}}$.
+        \item The extremal lock-chart can have
+        at most $|S_{\hat{q}}|$ individual keys / locks.
+      \end{enumerate}
+    \end{itemize}
+  \end{minipage}
+\end{frame}
+
+
+\begin{frame}{Independent master keys}
+  \begin{columns}
+    \begin{column}{.2\textwidth}
+      \includegraphics[height=0.8\textheight]{IndependentKeysLockChart.pdf}
+    \end{column}
+
+    \begin{column}{.8\textwidth}
+      \begin{itemize}
+        \item \textbf{Assumption:} Lock-chart has at most $p\cdot (d-1) + 1$ keys.
+        \item \textbf{Consequences:}
+        \begin{enumerate}
+          \item Any lock can be added in future.
+          \item There are $2^{p\cdot (d-1) + 1}$ such locks.
+        \end{enumerate}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+
+
+
+\begin{frame}{Conclusions}
+  \begin{itemize}
+    \item The computational complexity proof show that the
+    $\mathcal{P} \times \mathcal{NP}$ boundary disects the lock-chart problem.
+    \item Practical cutting-counting algorithm allowed by the “compilation to gecons”.
+    \item All-different pruning improves a state-of-the-art algorithm.
+    \item SAT-based algorithm is the new baseline.
+    \item Extensibility has been formalized.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    Thank you for your attention.
+  \end{center}
+\end{frame}
+
+
+
+\begin{frame}{Question \#1}
+  How many cylinders are there?
+
+  \vfill
+
+  \begin{itemize}
+    \item Cutting is a $p$-dimensional vector
+    with discrete values $\{1, \ldots, d\}$.
+    There may be $d^p$ of them.
+    \item On every position, a cylinder may or may not have a cutting depth $d$.
+    There are $p\cdot d$ such binary choices. Together $2^{p\cdot d}$ cylinders.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Question \#2}
+  \begin{block}{Citation}
+    15 “real” constraint can be polynomially translated to gecons.  
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Reviewer's comment}
+    For how many constraints is this true?
+    Is there a common pattern among the remaining ones?
+  \end{block}
+  
+  \vfill
+
+  \begin{block}{Otázka oponenta}
+    Pro kolik podmínek to je pravda
+    a co měly společné podmínky,
+    pro které to neplatilo?
+  \end{block}
+
+  \vfill
+\end{frame}
+
+\begin{frame}{Question \#3}
+  All constraints that are translated to gecons,
+  are translated to a polynomial number of gecons.
+
+  \vfill
+
+  \begin{block}{Example}
+    “The first $n$ positions may not be equal.”
+
+    \vfill
+
+    Generates $\mathcal{O}(d \cdot n^2)$ gecons:
+    \begin{tabular}{cccc}
+      $(1,1,*,*,\ldots,*),$ & $(2,2,*,*,\ldots,*),$ & $\ldots,$ & $(d,d,*,*,\ldots,*)$ \\
+      $(1,*,1,*,\ldots,*),$ & $(2,*,2,*,\ldots,*),$ & $\ldots,$ & $(d,*,d,*,\ldots,*)$ \\
+      $(*,1,1,*,\ldots,*),$ & $(*,2,2,*,\ldots,*),$ & $\ldots,$ & $(*,d,d,*,\ldots,*)$ \\
+      $\vdots$              & $\vdots$              & $\vdots$  & $\vdots$             \\
+    \end{tabular}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Question \#3}
+  Some constraints are not translatable to gecons.
+
+  \vfill
+
+  \begin{block}{Example}
+    “Some two cutting depths differ by at least $n$.”
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Solution in the solver}
+    We use \textit{existential constraints} (excons) \cite{horenovsky2018}.
+    Used for constraints speaking about “existence” of a cutting depth.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Question \#4}
+
+  \begin{block}{Reviewer's criticism}
+    Theoretical results are straightforward,
+    except for Theorem 52, whose proof is incomplete.
+  \end{block}
+  
+  \vfill
+
+  \begin{block}{Výhrada oponenta}
+    K teoretickým výsledkům mám výhrady:
+    jsou povětšinou přímočaré s výjímkou věty 52,
+    která má neúplný důkaz.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Question \#4}
+  \begin{itemize}
+    \item Proofs in the theoretical results are straightforward indeed.
+    \item Most of them fit within a single A5 page (see page 37).
+    \item The results are still novel.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Question \#4}
+  \begin{center}
+    \includegraphics[height=0.8\textheight]{UpperBoundIllustration.pdf}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Question \#4}
+    \begin{itemize}
+      \item Let $0 \leq q < r \leq p$,
+      $S_q' \subseteq S_q$, $S_r' \subseteq S_r$
+      and $S_q' \cup S_r'$ be an independent set.
+      \item Proved that $$|S_q'| + |S_r'| \leq \max\{|S_q|, |S_r|\}\ .$$
+      \item Can $|S_q'| + |S_r'| + |S_s'| + \cdots \leq \max\{|S_q|, |S_r|, |S_s|, \ldots\}$?
+      \pause
+      \item Proof is incomplete.
+      \item There is no known counter-example.
+      \item I am convinced that the theorem still holds.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Question \#5}
+  \begin{block}{Reviewer's comment}
+    The algorithms were tested in the “vanilla framework”,
+    but the gecons alone cause NP-completeness.
+    Are there resons to believe that the results
+    would not change [if gecons were included]?
+  \end{block}
+  
+  \begin{block}{Otázka oponenta}
+    Testování algoritmů proběhlo ve „vanilla framework“.
+    Samotná omezení ve formě geconů zapřičiňují NP-úplnost.
+    Existují důvody pro to, že by se výsledky podstatně nezměnily
+    při porovnávání vstupních dat z praxe?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Question \#5}
+  \begin{itemize}
+    \item Let's assume that the Lawers' algorithm can (somehow) accomodate gecons.
+    \item \textbf{Will SAT be still better?}
+  \end{itemize}
+
+  \pause
+  \begin{enumerate}
+    \item \textbf{Runtime}:
+    \begin{itemize}
+      \item Finding a valid key cutting given real-world constraints is easy ($\leq 1\,$ms).
+      \item Gecons are applied to each key separately (exploited by DPLL).
+      \item Finding valid key cuttings for $\sim 100$ keys is $\leq 1\,$s.
+    \end{itemize}
+    \pause
+    \item \textbf{Criterial function:}
+    \begin{itemize}
+      \item Some modifications to the strategy are needed.
+      \item It is tricky to pick a cutting depths to forbid.
+      \item This is done in the commercial product.
+      \item Lock-charts of size $\sim 25$ keys can still be optimized within $3\,$s.
+    \end{itemize}
+    \item Also, the 2 orders-of-magnitude margin is very big.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Question \#0}
+  \begin{block}{Reviewer's comment}
+    Based on the presented research,
+    has there been a progamme written
+    that could be practically used
+    to design master keyed systems?
+  \end{block}
+  \begin{block}{Otázka oponenta}
+    Byl na základě představeného výzkumu napsán program,
+    který se v praxi použil na návrh zámků a klíčů,
+    případně na nějaké dílčí úlohy?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Question \#0}
+  \begin{itemize}
+    \item Yes.
+    \item The translation to SAT is already in production.
+    \item A fully fledged all-different pruning is in development.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \bibliographystyle{humanbio}
+  \bibliography{References}
+\end{frame}
+\end{document}

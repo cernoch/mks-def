@@ -1,0 +1,26 @@
+\frametitle{Use of cutting-counting}
+\begin{minipage}[t][180pt][t]{.58\textwidth}
+    A typical real-world lc.:
+    \begin{verbatim}
+**..*.....*........
+*.*..*.....*....... <- Group 1
+*...**.*....*......
+***.....*....*.....
+****...*......*....
+**..*..........*...
+*.*..*..........*.. <- Group 1
+*...***.*........*.
+**********........*
+\____ ___/\___ ___/
+     ˇ        ˇ
+  MASTER  INDIVIDUAL
+    \end{verbatim}
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}[t][180pt][t]{.4\textwidth}
+    \begin{itemize}
+      \item Each \textit{group} defined by a combination of master keys.
+      \item RCM was generalized to count individual keys in each group.
+    \end{itemize}
+  \end{minipage}
